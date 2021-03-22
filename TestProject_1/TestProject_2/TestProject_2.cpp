@@ -1,8 +1,10 @@
 // TestProject_2.cpp : Defines the entry point for the application.
 //
 
-#include "framework.h"
+#include "stdafx.h"
 #include "TestProject_2.h"
+#include "GameFramework.h"
+CGameFramework gGameFramework;
 
 #define MAX_LOADSTRING 100
 
@@ -43,14 +45,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MSG msg;
 
     // Main message loop:
-    while (GetMessage(&msg, nullptr, 0, 0))
+    while (1)
     {
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+        if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
+            if (msg.message == WM_QUIT) break;
+            if (!::TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+            {
+                ::TranslateMessage(&msg);
+                ::DispatchMessage(&msg);
+            }
+        }
+        else
+        {
+            gGameFramework.FrameAdvance();
         }
     }
+    gGameFramework.OnDestroy();
 
     return (int) msg.wParam;
 }
@@ -64,25 +75,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 //
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
-    WNDCLASSEXW wcex;
-
+    WNDCLASSEX wcex;
     wcex.cbSize = sizeof(WNDCLASSEX);
-
-    wcex.style          = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc    = WndProc;
-    wcex.cbClsExtra     = 0;
-    wcex.cbWndExtra     = 0;
-    wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_TESTPROJECT2));
-    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_TESTPROJECT2);
-    wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
-
-    return RegisterClassExW(&wcex);
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = WndProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = hInstance;
+    wcex.hIcon = ::LoadIcon(hInstance,
+        MAKEINTRESOURCE(IDI_TESTPROJECT2));
+    wcex.hCursor = ::LoadCursor(NULL, IDC_ARROW);
+    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    //주 윈도우의 메뉴가 나타나지 않도록 한다.
+    wcex.lpszMenuName = NULL;
+    wcex.lpszClassName = szWindowClass;
+    wcex.hIconSm = ::LoadIcon(wcex.hInstance,
+        MAKEINTRESOURCE(IDI_SMALL));
+    return ::RegisterClassEx(&wcex);
 }
-
 //
 //   FUNCTION: InitInstance(HINSTANCE, int)
 //
@@ -95,30 +105,22 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-    DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
-    
-    RECT rc = { 0,0,640,480 };
-    
+    hInst = hInstance;
+    //주 윈도우의 클라이언트 영역의 크기를 원하는 크기로 설정한다.
+    RECT rc = { 0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT };
+    DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX |
+        WS_SYSMENU | WS_BORDER;
     AdjustWindowRect(&rc, dwStyle, FALSE);
-    //AdjustWindowRect(LPRECT lpRect, DWORD dwStyle,BOOL bMenu)
-    //lpRect->원하는 크기를 나타내는 사각형 지정
-    //dwStyle-> 윈도우의 스타일을 지정
-    //bMenu->윈도우가 메뉴를 가지는지 여부 지정(True면 윈도우가 메뉴를 가짐)
-
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, dwStyle,
-      CW_USEDEFAULT, CW_USEDEFAULT, rc.right-rc.left, rc.bottom-rc.top, nullptr, nullptr, hInstance, nullptr);
-
-   if (!hWnd)
-   {
-      return FALSE;
-   }
-
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
-
-   return TRUE;
+    HWND hMainWnd = CreateWindow(szWindowClass, szTitle, dwStyle,
+        CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom -
+        rc.top, NULL, NULL, hInstance, NULL);
+    if (!hMainWnd) return(FALSE);
+    //프로그램의 주 윈도우가 생성되면 CGameFramework 클래스의 OnCreate() 함수를 호출하여 프레임워크 객체를 초기화하도록 한다.
+        gGameFramework.OnCreate(hInstance, hMainWnd);
+        ::ShowWindow(hMainWnd, nCmdShow);
+        ::UpdateWindow(hMainWnd);
+        return(TRUE);
 }
-
 //
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //

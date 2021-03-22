@@ -1,2 +1,10 @@
-﻿  TestProject_2.cpp
+﻿  Camera.cpp
+  GameFramework.cpp
+  GameObject.cpp
+  GraphicsPipeline.cpp
+  Mesh.cpp
+  Player.cpp
+  Scene.cpp
+  TestProject_2.cpp
+  Generating Code...
   TestProject_2.vcxproj -> C:\Users\USER\Desktop\3DGP\TestProject_1\Debug\TestProject_2.exe
