@@ -3,6 +3,7 @@
 #include "Camera.h"
 
 class CGraphicsPipeline
+//모델 좌표계의 점을 월드변환,카메라변환,원근투영변환 하기 위한 클래스
 {
 private:
 	static CGameObject* m_pGameObject;

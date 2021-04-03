@@ -24,6 +24,7 @@
 
 #define RANDOM_COLOR			(0xFF000000 | ((rand() * 0xFFFFFF) / RAND_MAX))
 
+// Change Degree to Radian
 #define DegreeToRadian(x)		float((x)*3.141592654f/180.0f)
 
 #define EPSILON					1.0e-2f

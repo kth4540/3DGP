@@ -23,13 +23,16 @@ private:
 	float m_fxPosition = 0.0f;
 	float m_fyPosition = 0.0f;
 	float m_fzPosition = 0.0f;
+
 	//카메라의 회전(카메라 좌표계)
 	float m_fxRotation = 0.0f;
 	float m_fyRotation = 0.0f;
 	float m_fzRotation = 0.0f;
+
 	//카메라의 시야각, 투영 사각형까지의 거리
 	float m_fFOVAngle = 90.0f;
 	float m_fProjectRectDistance = 1.0f;
+
 	//뷰포트
 	CViewport* m_pViewport = NULL;
 	//뷰포트의 가로 길이와 세로 길이의 비율(종횡비: Aspect ratio)
@@ -40,13 +43,16 @@ public:
 	CPoint3D CameraTransform(CPoint3D& f3World);
 	CPoint3D ProjectionTransform(CPoint3D& f3Camera);
 	CPoint3D ScreenTransform(CPoint3D& f3Projection);
+
 	void SetPosition(float x, float y, float z) {
 		m_fxPosition = x;
 		m_fyPosition = y; m_fzPosition = z;
 	}
+
 	void SetRotation(float fPitch, float fYaw, float fRoll) {
 		m_fxRotation = fPitch; m_fyRotation = fYaw; m_fzRotation = fRoll;
 	}
+
 	//카메라의 뷰포트와 시야각을 설정한다.
 	void SetViewport(int xStart, int yStart, int nWidth, int
 		nHeight);

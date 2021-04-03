@@ -5,6 +5,7 @@ CGameObject::~CGameObject(void)
 //이 게임 객체는 더 이상 메쉬를 참조하지 않으므로 메쉬의 참조값을 1 감소한다.
 if (m_pMesh) m_pMesh->Release();
 }
+
 CPoint3D CGameObject::WorldTransform(CPoint3D& f3Model)
 {
 	float fPitch = DegreeToRadian(m_fxRotation);
@@ -46,11 +47,13 @@ CPoint3D CGameObject::WorldTransform(CPoint3D& f3Model)
 	f3World.z += m_fzPosition;
 	return(f3World);
 }
+
 void CGameObject::Animate(float fElapsedTime)
 {
 	Rotate(m_fxRotationSpeed * fElapsedTime, m_fyRotationSpeed *
 		fElapsedTime, m_fzRotationSpeed * fElapsedTime);
 }
+
 void CGameObject::Render(HDC hDCFrameBuffer)
 {
 	HPEN hPen = ::CreatePen(PS_SOLID, 0, m_dwColor);
