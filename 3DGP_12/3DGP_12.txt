@@ -1,0 +1,114 @@
+##컴퓨터 구조
+
+	CPU, 비디오카드, 디스플레이, 입출력장치, 메모리
+
+	메모리에서 운영체제가 실행되고 있고, 운영체제에서 API를 사용해 프로그램 생성
+
+	Direct3D라는 라이브러리로 3D 그래픽스 프로그램을 만들 수 있음
+
+	비디오카드 안에 있는 GPU라는 그래픽 전용 프로세서와 VRAM을 사용
+
+##Direct3D 디바이스
+
+	프레임 버퍼 -모니터로 출력되어야 하는 비디오 메모리의 영역
+
+	프레임 - 화면에 출력되는 하나의 장면
+
+	프레임 레이트 - 1초 동안 출력되는 평균 프레임의 수
+
+	FPS(Frame Per Second)->의미있는 FPS:기본 60, 프레임은 너무 낮아도 안되지만 너무 높아도 의미가 없음
+
+	아무리 빠른 속도로 프레임을 모니터에 전송해도, 모니터 주사율이 낮으면 의미가 없음
+
+	1초에 모니터의 픽셀 수 * 주사율 이상은 출력할 수 없음
+
+	모니터는 줄 단위로 출력을 하는데, 가로로 한 줄씩 스캔하는 것을 수평 스캔, 가로로 스캔된 줄들을 쭉 스캔하는 것을 수평 스캔,
+	수평 스캔할 때 다음 줄을 스캔하기 위해 돌아오는 것을 수평 회귀, 수직 스캔 이후 다음 사진을 스캔하기 위해  돌아오는 것을 수직 회귀
+
+	프레임 버퍼의 공유 - 하나의 프레임 버퍼를 디스플레이로 출력하는 도중에
+	출력할 내용을 그 프레임 버퍼에 쓰는 상황->screen tearing 현상발생-> 해결 위해 이중버퍼 사용
+
+	이중 버퍼링 - 2개의 프레임 버퍼(전면버퍼, 후면버퍼)를 사용, 후면 버퍼에서 그린 내용을 전면 버퍼로 이동, 전면 버퍼를  화면에 출력
+	->이런 구조를 Swap Chain, 후면버퍼를 전면버퍼로 옮기는 과정을 Presentation
+	
+	Presentation의 방식에는 Flipping(전면버퍼와 후면버퍼를 빠르게 바꿈), Blit(버퍼 내용을 복사) 		
+
+##색상 표현
+
+	색상의 요소 : 빨강색(R), 녹색(G), 파랑색(B)을 혼합해서 여러 색상을 표현
+
+	색상 표현은 0~255의 방식, 정규화된 형태로 0~1의 방식이 있음
+
+	DirectX에서 XMCOLOR라는 Structure로 32비트 ARGB를 제공, 128비트 색상은 XMVECTOR
+
+	XMCOLOR를 PackedVector::XMLoadColor를 사용해 XMVECTOR로 변환 가능
+
+##COM(Component Object Model) 객체
+
+	DLL의 형태로 제공
+
+	소프트웨어 객체들을 표준화해서 사용하기 위해 만들어짐
+
+	객체 내부는 노출하지 않고, 호출할 수 있는 메소드 함수들만을 노출
+	->일반적인 C++ 객체를 사용하는 방법과 유사하지만 객체 생성, 소멸하는 방식이 다름
+	->new,delete 대신 Addref(), Release() 사용
+
+	COM 객체는 인터페이스를 통해 참조하지만, 실제로는 인터페이스 포인터를 통하여 참조
+
+	Addref() : 인터페이스의 참조 카운터를 1 증가-> 이 객체를 사용하고 있음을 알림
+
+	Release() : 참조 카운터를 1 감소시킨다 -> 이 객체를 더 이상 사용하지 않음을 알림
+	->참조 카운터가 0이 되면 그 객체는 자동으로 소멸
+
+	QueryInterface() : 이 객체가 어떤 인터페이스를 제공하는가를 문의
+
+##COM 객체의 생성과 소멸
+
+	D3D12CreateDevice(REFIID riid, void **ppDevice)로 COM 객체를 생성
+	-> ppDevice는 pd3dDevice 포인터객체의 주소를 받아오고, pd3dDevice는 Direct3D 인터페이스를 가리킴
+
+	CreateDXGIFactory()도 COM 객체를 생성하는 방법
+	->인터페이스 포인터를 선언해서 CreateDXGIFactory()에 포인터의 주소를 넘김
+
+##GUID(Globally Unique Identifier)
+
+	인터페이스 클래스 식별자를 나타내는 128비트 정수 문자열
+
+	IID : 인터페이스를 구별하기 위한 GUID
+
+	uuidof 연산자 : 인터페이스 자료형, 클래스 이름, 인터페이스 포인터에 대한 GUID를 반환
+
+	REFIID를 요구하는 함수에 uuidof 사용
+
+	COMPtr : 인터페이스 포인터의 소멸자에서 Release()를 호출하는 스마트 포인터를 구현
+	->#include <wrl.h>, using Microsoft::WRL::ComPtr;
+
+##DXGI(DirectX graphics Interface)
+
+	DirectX 그래픽 런타임에 독립적인 저수준 작업을 관리
+
+	하드웨어 디바이스의 열거, 모니터의 열거, 프리젠트, 전체 화면 모드로의 전환 등
+
+	DirectX 그래픽을 위한 기본적이고 공통적인 프레임워크 제공
+
+	새로운 그래픽 라이브러리가 나오더라도 변하지 않을 수 있도록 구성
+	
+	어댑터(하드웨어/소프트웨어 능력을 추상화한 객체), 출력장치, 디바이스등이 제공됨
+
+##DXGI 인터페이스 클래스
+
+	IUnknown, IDXGIObject, IDXGIFactory, .....
+
+	IDXGIObject: DXGI를 위한 기본적인 것들
+
+	IDXGIFactory: 어댑터와 디바이스들을 총괄
+
+	IDXGIAdapter: 그래픽카드를 나타냄 
+
+	IDXGIDOutput: 출력장치를 나타냄
+
+	IDXGIDevice: 그래픽적인 출력을 위해 필요한 것들
+
+##DXGI 팩토리 생성
+
+	CreateDXGIFactory(REFIID riid, void*ppFactory)
